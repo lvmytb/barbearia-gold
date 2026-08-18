@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Barbearia Premium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════
+   RESET & VARIABLES
+   ═══════════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#0A0A0A;
+  --bg-alt:#0E0E0E;
+  --surface:#161412;
+  --card:#1A1714;
+  --gold:#C4973B;
+  --gold-dim:rgba(196,151,59,.15);
+  --gold-hover:#D4A94B;
+  --cream:#E8DDD3;
+  --muted:#7A756F;
+  --border:#2A2520;
+  --nav-h:56px;
+}
+
+html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h)}
+
+body{
+  background:var(--bg);color:var(--cream);
+  font-family:'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+
+.section-pad{
+  padding:80px 20px;
+  max-width:960px;
+  margin:0 auto;
+}
+
+/* ═══════════════════════════════════════
+   SCISSORS CUT DIVIDER
+   ═══════════════════════════════════════ */
+.scissors-cut{
+  position:relative;
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  z-index:2;
+}
+
+/* the dashed cutting line */
+.scissors-cut__line{
+  position:absolute;
+  top:50%;left:0;right:0;
+  height:0;
+  border-top:2px dashed var(--border);
+  transform:translateY(-50%);
+}
+
+/* the solid "already cut" line that grows */
+.scissors-cut__cut{
+  position:absolute;
+  top:50%;left:0;
+  width:0;
+  height:0;
+  border-top:2px solid var(--gold);
+  transform:translateY(-50%);
+  transition:width 1.4s cubic-bezier(.22,1,.36,1);
+}
+.scissors-cut.snipped .scissors-cut__cut{
+  width:100%;
+}
+
+/* scissors icon that slides across */
+.scissors-cut__icon{
+  position:absolute;
+  top:50%;
+  left:-40px;
+  transform:translateY(-50%);
+  z-index:3;
+  transition:left 1.4s cubic-bezier(.22,1,.36,1);
+  filter:drop-shadow(0 0 8px rgba(196,151,59,.4));
+}
+.scissors-cut.snipped .scissors-cut__icon{
+  left:calc(100% - 10px);
+}
+.scissors-cut__icon svg{
+  width:28px;height:28px;
+}
+
+/* little snip fragments that fly off */
+.scissors-cut__frag{
+  position:absolute;
+  top:50%;
+  width:12px;height:2px;
+  background:var(--gold);
+  opacity:0;
+  border-radius:1px;
+  pointer-events:none;
+}
+.scissors-cut.snipped .scissors-cut__frag{
+  animation:fragFly .6s ease-out forwards;
+}
+.scissors-cut__frag:nth-child(4){animation-delay:.3s;left:25%}
+.scissors-cut__frag:nth-child(5){animation-delay:.5s;left:50%}
+.scissors-cut__frag:nth-child(6){animation-delay:.7s;left:75%}
+
+@keyframes fragFly{
+  0%{opacity:.8;transform:translateY(-50%) rotate(0) scale(1)}
+  100%{opacity:0;transform:translateY(-30px) rotate(45deg) scale(.3)}
+}
+
+/* ═══════════════════════════════════════
+   NAVIGATION — mobile-first
+   ═══════════════════════════════════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;
+  height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;
+  background:rgba(10,10,10,.8);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(196,151,59,.08);
+  z-index:100;
+  transition:box-shadow .3s;
+}
+.nav.scrolled{
+  box-shadow:0 2px 20px rgba(0,0,0,.5);
+  border-bottom-color:rgba(196,151,59,.18);
+}
+
+.nav__logo{
+  font-family:'Playfair Display',serif;
+  font-weight:900;font-size:17px;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.nav__logo span{color:var(--gold)}
+
+.nav__links{display:flex;gap:4px;list-style:none}
+.nav__links a{
+  font-size:12px;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;
+  padding:8px 12px;border-radius:8px;
+  color:var(--muted);transition:color .2s,background .2s;
+}
+.nav__links a:hover,.nav__links a.active{
+  color:var(--cream);background:var(--gold-dim);
+}
+
+.nav__toggle{
+  display:none;background:none;border:none;cursor:pointer;
+  width:26px;height:18px;position:relative;z-index:110;
+}
+.nav__toggle span{
+  display:block;width:100%;height:2px;background:var(--cream);
+  border-radius:2px;transition:all .3s;position:absolute;left:0;
+}
+.nav__toggle span:nth-child(1){top:0}
+.nav__toggle span:nth-child(2){top:8px}
+.nav__toggle span:nth-child(3){top:16px}
+.nav__toggle.open span:nth-child(1){top:8px;transform:rotate(45deg)}
+.nav__toggle.open span:nth-child(2){opacity:0}
+.nav__toggle.open span:nth-child(3){top:8px;transform:rotate(-45deg)}
+
+@media(max-width:680px){
+  .nav__toggle{display:block}
+  .nav__links{
+    position:fixed;top:0;right:0;
+    width:240px;height:100dvh;
+    flex-direction:column;gap:0;
+    background:rgba(10,10,10,.97);
+    backdrop-filter:blur(20px);
+    padding:72px 20px 40px;
+    transform:translateX(100%);
+    transition:transform .3s ease;
+    border-left:1px solid var(--border);
+  }
+  .nav__links.open{transform:translateX(0)}
+  .nav__links a{
+    font-size:15px;padding:14px 12px;
+    border-bottom:1px solid var(--border);border-radius:0;
+  }
+}
+
+/* ═══════════════════════════════════════
+   HERO
+   ═══════════════════════════════════════ */
+.hero{
+  min-height:100dvh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:calc(var(--nav-h) + 40px) 20px 60px;
+  position:relative;
+  background:radial-gradient(ellipse 500px 350px at 50% 45%,rgba(196,151,59,.05),transparent);
+}
+
+.hero__badge{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.3em;color:var(--gold);
+  border:1px solid var(--gold-dim);
+  padding:5px 16px;border-radius:100px;
+  margin-bottom:28px;
+}
+
+.hero__icon{
+  width:76px;height:76px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;margin-bottom:24px;
+}
+.hero__icon::before{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--gold);
+  animation:ringPulse 2.5s ease-in-out infinite;
+}
+.hero__icon::after{
+  content:'';position:absolute;inset:0;border-radius:50%;
+  border:1px solid var(--gold);opacity:.3;
+}
+@keyframes ringPulse{
+  0%,100%{transform:scale(1);opacity:.3}
+  50%{transform:scale(1.12);opacity:.8}
+}
+.hero__icon svg{
+  width:34px;height:34px;
+  animation:snip 3s ease-in-out infinite;
+}
+@keyframes snip{
+  0%,100%{transform:rotate(0)}
+  25%{transform:rotate(8deg)}
+  75%{transform:rotate(-8deg)}
+}
+
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-weight:900;font-size:clamp(32px,9vw,58px);
+  text-transform:uppercase;letter-spacing:.03em;
+  line-height:1.05;margin-bottom:12px;
+}
+.hero h1 em{font-style:italic;color:var(--gold);font-weight:700}
+
+.hero__sub{
+  font-size:14px;color:var(--muted);
+  max-width:340px;line-height:1.6;margin-bottom:36px;
+}
+
+.hero__cta{
+  display:inline-flex;align-items:center;gap:10px;
+  background:var(--gold);color:#0A0A0A;
+  padding:15px 32px;border-radius:12px;
+  font-weight:700;font-size:14px;letter-spacing:.02em;
+  transition:all .25s;position:relative;overflow:hidden;
+}
+.hero__cta::after{
+  content:'';position:absolute;top:0;left:-100%;
+  width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+  animation:btnShimmer 4s ease-in-out infinite;
+}
+@keyframes btnShimmer{
+  0%{left:-100%}40%{left:150%}100%{left:150%}
+}
+.hero__cta:hover{
+  background:var(--gold-hover);transform:translateY(-2px);
+  box-shadow:0 8px 28px rgba(196,151,59,.3);
+}
+.hero__cta svg{width:18px;height:18px;fill:#0A0A0A}
+
+.hero__scroll{
+  position:absolute;bottom:20px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--muted);font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;
+  animation:bounce 2s ease-in-out infinite;
+}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+.hero__scroll svg{width:14px;height:14px;stroke:var(--muted);fill:none}
+
+/* ═══════════════════════════════════════
+   SECTION TITLES
+   ═══════════════════════════════════════ */
+.section-eyebrow{
+  font-size:10px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.3em;color:var(--gold);margin-bottom:10px;
+}
+.section-title{
+  font-family:'Playfair Display',serif;
+  font-weight:900;font-size:clamp(24px,5vw,38px);
+  text-transform:uppercase;letter-spacing:.03em;
+  line-height:1.1;margin-bottom:14px;
+}
+.section-desc{
+  color:var(--muted);font-size:14px;line-height:1.7;max-width:480px;
+}
+
+/* ═══════════════════════════════════════
+   ABOUT
+   ═══════════════════════════════════════ */
+#sobre{background:var(--bg-alt)}
+
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:48px;align-items:center;
+}
+.about__photo{
+  aspect-ratio:4/5;background:var(--card);border-radius:14px;
+  border:1px solid var(--border);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+}
+.about__photo-placeholder{
+  color:var(--muted);font-size:12px;text-align:center;padding:20px;
+}
+.about__photo-placeholder svg{
+  width:40px;height:40px;stroke:var(--border);fill:none;
+  margin-bottom:10px;display:block;margin-inline:auto;
+}
+.about__text .section-desc{margin-bottom:32px}
+
+.about__stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{
+  text-align:center;padding:16px 8px;
+  background:var(--card);border:1px solid var(--border);border-radius:10px;
+}
+.stat__number{
+  font-family:'Playfair Display',serif;
+  font-weight:900;font-size:clamp(22px,5vw,30px);
+  color:var(--gold);line-height:1;margin-bottom:4px;
+}
+.stat__label{
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.12em;
+}
+
+@media(max-width:680px){
+  .about-grid{grid-template-columns:1fr;gap:32px}
+  .about__photo{max-height:260px;aspect-ratio:16/10}
+}
+
+/* ═══════════════════════════════════════
+   GALLERY — Before / After
+   ═══════════════════════════════════════ */
+#galeria{background:var(--bg)}
+
+.gallery-intro{text-align:center;margin-bottom:48px}
+.gallery-intro .section-desc{margin-inline:auto}
+
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+}
+
+.ba-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+}
+.ba-slider{
+  position:relative;width:100%;aspect-ratio:4/3;
+  overflow:hidden;cursor:ew-resize;
+  user-select:none;-webkit-user-select:none;
+  touch-action:none;
+}
+.ba-slider__before,.ba-slider__after{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;color:var(--muted);
+}
+.ba-slider__before{background:#1a1612;z-index:1;clip-path:inset(0 50% 0 0)}
+.ba-slider__after{background:#12160e;z-index:0}
+
+.ba-slider__handle{
+  position:absolute;top:0;bottom:0;left:50%;width:3px;
+  background:var(--gold);z-index:3;transform:translateX(-50%);
+  pointer-events:none;
+}
+.ba-slider__handle::before{
+  content:'⇔';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:34px;height:34px;background:var(--gold);color:#0A0A0A;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+  box-shadow:0 2px 10px rgba(0,0,0,.5);
+}
+
+.ba-slider__label{
+  position:absolute;bottom:8px;z-index:4;
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.15em;background:rgba(10,10,10,.7);
+  padding:3px 8px;border-radius:5px;pointer-events:none;
+}
+.ba-slider__label--before{left:8px;color:var(--muted)}
+.ba-slider__label--after{right:8px;color:var(--gold)}
+
+.ba-card__info{
+  padding:14px 16px;display:flex;
+  align-items:center;justify-content:space-between;
+}
+.ba-card__service{font-weight:600;font-size:13px}
+.ba-card__tag{
+  font-size:10px;color:var(--gold);background:var(--gold-dim);
+  padding:3px 9px;border-radius:100px;
+  text-transform:uppercase;letter-spacing:.08em;font-weight:600;
+}
+
+.ba-placeholder{
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:6px;width:100%;height:100%;
+}
+.ba-placeholder svg{width:36px;height:36px;stroke:var(--border);fill:none}
+.ba-placeholder span{
+  font-size:11px;color:var(--muted);
+  letter-spacing:.08em;text-transform:uppercase;
+}
+
+/* ═══════════════════════════════════════
+   SERVICES
+   ═══════════════════════════════════════ */
+#servicos{background:var(--bg-alt)}
+
+.services-header{text-align:center;margin-bottom:40px}
+.services-header .section-desc{margin-inline:auto}
+
+.services-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;margin-bottom:40px;
+}
+@media(min-width:681px){
+  .services-grid{grid-template-columns:repeat(4,1fr)}
+}
+
+.service-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:12px;padding:22px 16px;text-align:center;
+  transition:border-color .25s,transform .25s;
+}
+.service-card:hover{border-color:var(--gold);transform:translateY(-2px)}
+.service-card:active{transform:scale(.97)}
+
+.service-card__icon{
+  width:40px;height:40px;margin:0 auto 12px;
+  background:var(--gold-dim);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.service-card__icon svg{width:20px;height:20px;stroke:var(--gold);fill:none}
+.service-card__name{font-weight:700;font-size:13px;margin-bottom:4px}
+.service-card__price{
+  font-family:'Playfair Display',serif;
+  font-weight:700;font-size:20px;color:var(--gold);margin-bottom:2px;
+}
+.service-card__time{font-size:11px;color:var(--muted)}
+
+/* ═══════════════════════════════════════
+   CONTACT
+   ═══════════════════════════════════════ */
+#contato{background:var(--bg)}
+
+.contact-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:40px;align-items:start;
+}
+@media(max-width:680px){
+  .contact-grid{grid-template-columns:1fr;gap:36px}
+}
+
+.contact__info h3{
+  font-family:'Playfair Display',serif;
+  font-size:20px;font-weight:900;margin-bottom:20px;
+}
+.contact-detail{
+  display:flex;align-items:flex-start;gap:12px;margin-bottom:20px;
+}
+.contact-detail__icon{
+  width:38px;height:38px;flex-shrink:0;
+  background:var(--gold-dim);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+}
+.contact-detail__icon svg{width:16px;height:16px;fill:var(--gold)}
+.contact-detail__text strong{display:block;font-size:13px;font-weight:600;margin-bottom:2px}
+.contact-detail__text span{font-size:12px;color:var(--muted);line-height:1.5}
+
+.contact__actions{display:flex;flex-direction:column;gap:12px}
+
+/* ═══════════════════════════════════════
+   BUTTONS
+   ═══════════════════════════════════════ */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:14px 20px;border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  text-decoration:none;transition:all .25s;
+  cursor:pointer;border:none;letter-spacing:.02em;
+  position:relative;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+.btn:active{transform:scale(.97)!important}
+
+.btn-gold{background:var(--gold);color:#0A0A0A}
+.btn-gold::after{
+  content:'';position:absolute;top:0;left:-100%;
+  width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+  animation:btnShimmer 4s ease-in-out infinite;
+}
+.btn-gold:hover{
+  background:var(--gold-hover);transform:translateY(-2px);
+  box-shadow:0 6px 24px rgba(196,151,59,.3);
+}
+.btn-gold svg{fill:#0A0A0A}
+
+.btn-whatsapp{background:#1A3A2A;color:#4ADE80;border:1px solid #2A5A3A}
+.btn-whatsapp:hover{background:#1F4530;transform:translateY(-1px)}
+.btn-whatsapp svg{fill:#4ADE80}
+
+.btn-outline{background:transparent;color:var(--cream);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--muted);background:var(--surface);transform:translateY(-1px)}
+.btn-outline svg{fill:var(--cream)}
+
+.btn-dark{background:var(--surface);color:var(--muted);border:1px solid var(--border)}
+.btn-dark:hover{border-color:var(--muted);color:var(--cream)}
+.btn-dark svg{fill:var(--muted);width:16px;height:16px}
+
+/* ═══════════════════════════════════════
+   MAP
+   ═══════════════════════════════════════ */
+.map-embed{
+  margin-top:40px;width:100%;aspect-ratio:2/1;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--muted);font-size:12px;
+}
+
+/* ═══════════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════════ */
+.site-footer{
+  text-align:center;padding:32px 20px;
+  border-top:1px solid var(--border);
+  font-size:11px;color:var(--muted);background:var(--bg);
+}
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL
+   ═══════════════════════════════════════ */
+@media(prefers-reduced-motion:no-preference){
+  .reveal{
+    opacity:0;transform:translateY(20px);
+    transition:opacity .5s ease,transform .5s ease;
+  }
+  .reveal.visible{opacity:1;transform:translateY(0)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .hero__icon::before,.hero__icon svg,.hero__cta::after,
+  .btn-gold::after,.hero__scroll,
+  .scissors-cut__icon,.scissors-cut__cut,
+  .scissors-cut__frag{animation:none!important;transition:none!important}
+  .reveal{opacity:1!important;transform:none!important}
+  .scissors-cut.snipped .scissors-cut__icon{left:calc(100% - 10px)}
+  .scissors-cut.snipped .scissors-cut__cut{width:100%}
+}
+
+/* ═══════════════════════════════════════
+   SAFE AREAS (notch phones)
+   ═══════════════════════════════════════ */
+@supports(padding:env(safe-area-inset-bottom)){
+  .site-footer{padding-bottom:calc(32px + env(safe-area-inset-bottom))}
+  .nav{padding-left:calc(20px + env(safe-area-inset-left));padding-right:calc(20px + env(safe-area-inset-right))}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAVIGATION ═══ -->
+<nav class="nav" id="nav">
+  <div class="nav__logo"><span>B</span>arbearia</div>
+  <button class="nav__toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav__links" id="navLinks">
+    <li><a href="#inicio" class="active">Início</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#servicos">Serviços</a></li>
+    <li><a href="#contato">Contato</a></li>
+  </ul>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero" id="inicio">
+  <div class="hero__badge">Est. 2020 · Piracicaba</div>
+  <div class="hero__icon">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M9.64 7.64a2.5 2.5 0 1 0-3.28-3.28 2.5 2.5 0 0 0 3.28 3.28zm0 0L12 10m-2.36 6.36a2.5 2.5 0 1 1-3.28 3.28 2.5 2.5 0 0 1 3.28-3.28zm0 0L12 14m8-4-8 4m0-4 8 4"
+        fill="none" stroke="#C4973B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+  <h1>Barbearia<br><em>Premium</em></h1>
+  <p class="hero__sub">Corte com estilo, barba impecável e um atendimento que você não encontra em outro lugar.</p>
+  <a href="#LINK_AGENDAMENTO" class="hero__cta">
+    <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+    Agende Agora
+  </a>
+  <div class="hero__scroll">
+    <span>Role</span>
+    <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </div>
+</section>
+
+<!-- ✂ CUT 1 ✂ -->
+<div class="scissors-cut" data-cut>
+  <div class="scissors-cut__line"></div>
+  <div class="scissors-cut__cut"></div>
+  <div class="scissors-cut__icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <circle cx="6" cy="18" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <line x1="8.5" y1="7.5" x2="20" y2="14" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="8.5" y1="16.5" x2="20" y2="10" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+</div>
+
+<!-- ═══ SOBRE ═══ -->
+<section id="sobre">
+  <div class="section-pad">
+    <div class="about-grid">
+      <div class="about__photo reveal">
+        <div class="about__photo-placeholder">
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="3"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <path d="m21 15-5-5L5 21"/>
+          </svg>
+          Coloque aqui a foto<br>da barbearia ou equipe
+        </div>
+      </div>
+      <div class="about__text reveal">
+        <p class="section-eyebrow">Nossa História</p>
+        <h2 class="section-title">Mais que um corte,<br>uma experiência</h2>
+        <p class="section-desc">
+          Nascemos da paixão por transformar a autoestima através do cuidado pessoal. Cada detalhe foi pensado para que você se sinta em casa. Nossos profissionais dominam as técnicas mais atuais do mercado.
+        </p>
+        <div class="about__stats">
+          <div class="stat">
+            <div class="stat__number">6+</div>
+            <div class="stat__label">Anos</div>
+          </div>
+          <div class="stat">
+            <div class="stat__number">5k+</div>
+            <div class="stat__label">Clientes</div>
+          </div>
+          <div class="stat">
+            <div class="stat__number">4.9</div>
+            <div class="stat__label">Avaliação</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ✂ CUT 2 ✂ -->
+<div class="scissors-cut" data-cut>
+  <div class="scissors-cut__line"></div>
+  <div class="scissors-cut__cut"></div>
+  <div class="scissors-cut__icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <circle cx="6" cy="18" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <line x1="8.5" y1="7.5" x2="20" y2="14" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="8.5" y1="16.5" x2="20" y2="10" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+</div>
+
+<!-- ═══ GALERIA ═══ -->
+<section id="galeria">
+  <div class="section-pad">
+    <div class="gallery-intro reveal">
+      <p class="section-eyebrow">Transformações</p>
+      <h2 class="section-title">Antes &amp; Depois</h2>
+      <p class="section-desc">Arraste o controle dourado para ver a transformação.</p>
+    </div>
+    <div class="gallery-grid">
+
+      <div class="ba-card reveal">
+        <div class="ba-slider" data-slider>
+          <div class="ba-slider__before">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Antes</span>
+            </div>
+          </div>
+          <div class="ba-slider__after">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Depois</span>
+            </div>
+          </div>
+          <div class="ba-slider__handle"></div>
+          <span class="ba-slider__label ba-slider__label--before">Antes</span>
+          <span class="ba-slider__label ba-slider__label--after">Depois</span>
+        </div>
+        <div class="ba-card__info">
+          <span class="ba-card__service">Corte Degradê</span>
+          <span class="ba-card__tag">Destaque</span>
+        </div>
+      </div>
+
+      <div class="ba-card reveal">
+        <div class="ba-slider" data-slider>
+          <div class="ba-slider__before">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Antes</span>
+            </div>
+          </div>
+          <div class="ba-slider__after">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Depois</span>
+            </div>
+          </div>
+          <div class="ba-slider__handle"></div>
+          <span class="ba-slider__label ba-slider__label--before">Antes</span>
+          <span class="ba-slider__label ba-slider__label--after">Depois</span>
+        </div>
+        <div class="ba-card__info">
+          <span class="ba-card__service">Barba Desenhada</span>
+          <span class="ba-card__tag">Popular</span>
+        </div>
+      </div>
+
+      <div class="ba-card reveal">
+        <div class="ba-slider" data-slider>
+          <div class="ba-slider__before">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Antes</span>
+            </div>
+          </div>
+          <div class="ba-slider__after">
+            <div class="ba-placeholder">
+              <svg viewBox="0 0 24 24" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              <span>Foto Depois</span>
+            </div>
+          </div>
+          <div class="ba-slider__handle"></div>
+          <span class="ba-slider__label ba-slider__label--before">Antes</span>
+          <span class="ba-slider__label ba-slider__label--after">Depois</span>
+        </div>
+        <div class="ba-card__info">
+          <span class="ba-card__service">Corte + Barba</span>
+          <span class="ba-card__tag">Combo</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ✂ CUT 3 ✂ -->
+<div class="scissors-cut" data-cut>
+  <div class="scissors-cut__line"></div>
+  <div class="scissors-cut__cut"></div>
+  <div class="scissors-cut__icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <circle cx="6" cy="18" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <line x1="8.5" y1="7.5" x2="20" y2="14" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="8.5" y1="16.5" x2="20" y2="10" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+</div>
+
+<!-- ═══ SERVIÇOS ═══ -->
+<section id="servicos">
+  <div class="section-pad">
+    <div class="services-header reveal">
+      <p class="section-eyebrow">Serviços</p>
+      <h2 class="section-title">O que oferecemos</h2>
+      <p class="section-desc">Cada serviço inclui consultoria de estilo personalizada.</p>
+    </div>
+    <div class="services-grid">
+      <div class="service-card reveal">
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9.64 7.64a2.5 2.5 0 1 0-3.28-3.28 2.5 2.5 0 0 0 3.28 3.28zm0 0L12 10m-2.36 6.36a2.5 2.5 0 1 1-3.28 3.28 2.5 2.5 0 0 1 3.28-3.28zm0 0L12 14m8-4-8 4m0-4 8 4"/>
+          </svg>
+        </div>
+        <div class="service-card__name">Corte Masculino</div>
+        <div class="service-card__price">R$ 45</div>
+        <div class="service-card__time">45 min</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" fill="none" stroke-linecap="round">
+            <path d="M7 20l5-5 5 5M12 15V4M4 4h16"/>
+          </svg>
+        </div>
+        <div class="service-card__name">Barba Completa</div>
+        <div class="service-card__price">R$ 35</div>
+        <div class="service-card__time">30 min</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" fill="none" stroke-linecap="round">
+            <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+          </svg>
+        </div>
+        <div class="service-card__name">Corte + Barba</div>
+        <div class="service-card__price">R$ 70</div>
+        <div class="service-card__time">1h 15min</div>
+      </div>
+      <div class="service-card reveal">
+        <div class="service-card__icon">
+          <svg viewBox="0 0 24 24" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+          </svg>
+        </div>
+        <div class="service-card__name">Dia do Noivo</div>
+        <div class="service-card__price">R$ 150</div>
+        <div class="service-card__time">2h</div>
+      </div>
+    </div>
+    <div style="max-width:380px;margin:0 auto" class="reveal">
+      <a href="#LINK_AGENDAMENTO" class="btn btn-gold">
+        <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+        Agende Seu Horário
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ✂ CUT 4 ✂ -->
+<div class="scissors-cut" data-cut>
+  <div class="scissors-cut__line"></div>
+  <div class="scissors-cut__cut"></div>
+  <div class="scissors-cut__icon">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="6" cy="6" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <circle cx="6" cy="18" r="2.5" stroke="#C4973B" stroke-width="1.6"/>
+      <line x1="8.5" y1="7.5" x2="20" y2="14" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="8.5" y1="16.5" x2="20" y2="10" stroke="#C4973B" stroke-width="1.6" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+  <div class="scissors-cut__frag"></div>
+</div>
+
+<!-- ═══ CONTATO ═══ -->
+<section id="contato">
+  <div class="section-pad">
+    <div class="contact-grid">
+      <div class="contact__info reveal">
+        <p class="section-eyebrow">Contato</p>
+        <h3>Venha nos visitar ou<br>fale com a gente</h3>
+        <div class="contact-detail">
+          <div class="contact-detail__icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z"/></svg>
+          </div>
+          <div class="contact-detail__text">
+            <strong>Endereço</strong>
+            <span>Rua Exemplo, 123 — Centro<br>Piracicaba, SP</span>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail__icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/></svg>
+          </div>
+          <div class="contact-detail__text">
+            <strong>Horário</strong>
+            <span>Seg–Sex: 9h às 20h<br>Sáb: 8h às 18h</span>
+          </div>
+        </div>
+        <div class="contact-detail">
+          <div class="contact-detail__icon">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2a1 1 0 0 1 1.11-.27 11.36 11.36 0 0 0 3.58.6 1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1 11.36 11.36 0 0 0 .6 3.58 1 1 0 0 1-.27 1.11z"/></svg>
+          </div>
+          <div class="contact-detail__text">
+            <strong>Telefone</strong>
+            <span>(19) 99999-9999</span>
+          </div>
+        </div>
+      </div>
+      <div class="contact__actions reveal">
+        <a href="#LINK_AGENDAMENTO" class="btn btn-gold">
+          <svg viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>
+          Agende Agora
+        </a>
+        <a href="https://wa.me/5519999999999?text=Ol%C3%A1%2C%20gostaria%20de%20agendar!" class="btn btn-whatsapp" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347zM12.05 21.785h-.01a9.87 9.87 0 0 1-5.032-1.378l-.36-.214-3.742.982.999-3.648-.235-.374A9.86 9.86 0 0 1 2.13 12.06c0-5.454 4.436-9.89 9.9-9.89a9.83 9.83 0 0 1 7 2.9 9.83 9.83 0 0 1 2.9 7c-.004 5.457-4.44 9.895-9.9 9.895l.02-.18zM20.52 3.449C18.24 1.245 15.24 0 12.05 0 5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.946L.057 24l6.305-1.654a11.88 11.88 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.82 11.82 0 0 0-3.48-8.397z"/></svg>
+          Fale pelo WhatsApp
+        </a>
+        <a href="https://instagram.com/SUA_BARBEARIA" class="btn btn-outline" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+          Siga no Instagram
+        </a>
+        <a href="https://maps.google.com/?cid=SEU_CID_GOOGLE" class="btn btn-dark" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z" fill="currentColor"/></svg>
+          Ver no Google Maps
+        </a>
+      </div>
+    </div>
+    <div class="map-embed reveal">
+      Substitua pelo embed do Google Maps
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  © 2026 Barbearia Premium · Piracicaba, SP
+</footer>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+// ── Nav scroll shadow ──
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', scrollY > 40);
+}, { passive: true });
+
+// ── Mobile menu ──
+const toggle = document.getElementById('navToggle');
+const links  = document.getElementById('navLinks');
+toggle.addEventListener('click', () => {
+  toggle.classList.toggle('open');
+  links.classList.toggle('open');
+});
+links.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    toggle.classList.remove('open');
+    links.classList.remove('open');
+  });
+});
+
+// ── Active nav on scroll ──
+const sections = document.querySelectorAll('section[id]');
+const navAnchors = document.querySelectorAll('.nav__links a');
+const secObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navAnchors.forEach(a => a.classList.remove('active'));
+      const m = document.querySelector(`.nav__links a[href="#${e.target.id}"]`);
+      if (m) m.classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -40% 0px' });
+sections.forEach(s => secObs.observe(s));
+
+// ── Scroll reveal ──
+const reveals = document.querySelectorAll('.reveal');
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); revObs.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(el => revObs.observe(el));
+
+// ── Scissors cut on scroll ──
+const cuts = document.querySelectorAll('[data-cut]');
+const cutObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('snipped');
+      cutObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.5 });
+cuts.forEach(c => cutObs.observe(c));
+
+// ── Before/After sliders (touch-optimized) ──
+document.querySelectorAll('[data-slider]').forEach(slider => {
+  const before = slider.querySelector('.ba-slider__before');
+  const handle = slider.querySelector('.ba-slider__handle');
+  let dragging = false;
+
+  function update(x) {
+    const rect = slider.getBoundingClientRect();
+    let pct = ((x - rect.left) / rect.width) * 100;
+    pct = Math.max(5, Math.min(95, pct));
+    before.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+    handle.style.left = pct + '%';
+  }
+
+  slider.addEventListener('pointerdown', e => {
+    dragging = true;
+    slider.setPointerCapture(e.pointerId);
+    update(e.clientX);
+  });
+  slider.addEventListener('pointermove', e => { if (dragging) update(e.clientX); });
+  slider.addEventListener('pointerup',     () => dragging = false);
+  slider.addEventListener('pointercancel', () => dragging = false);
+});
+</script>
+</body>
+</html>
